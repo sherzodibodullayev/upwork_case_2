@@ -4,3 +4,5 @@ __pycache__/
 *.pyc
 .n8n/
 node_modules/
+eval_run.log
+eval/results.json

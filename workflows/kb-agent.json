@@ -1,0 +1,233 @@
+{
+  "name": "kb-agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "kb-ingest",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000001",
+      "name": "Ingest webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-460, 380],
+      "webhookId": "c3000000-0000-4000-8000-000000000001"
+    },
+    {
+      "parameters": {
+        "jsCode": "// The handbook lives in git, not on the n8n host, so ingestion pulls the\n// published copy. Re-running re-indexes from whatever is currently on main.\nconst BASE = 'https://raw.githubusercontent.com/sherzodibodullayev/upwork_case_2/main/kb/';\nconst DOCS = [\n  '01-device-and-equipment-policy',\n  '02-support-tiers-and-sla',\n  '03-remote-work-policy',\n  '04-remote-access-policy',\n  '05-security-incident-response',\n  '06-onboarding-and-offboarding',\n  '07-software-and-procurement',\n  '08-data-classification-and-retention',\n];\nreturn DOCS.map(doc => ({ json: { doc, url: BASE + doc + '.md' } }));"
+      },
+      "id": "c3000000-0000-4000-8000-000000000002",
+      "name": "List documents",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-240, 380]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": { "response": { "response": { "responseFormat": "text" } } }
+      },
+      "id": "c3000000-0000-4000-8000-000000000003",
+      "name": "Fetch document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-20, 380]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Carry the document name alongside the text so it survives into chunk\n// metadata. Without it a retrieved chunk cannot be cited.\nreturn $input.all().map((item, i) => ({\n  json: {\n    doc: $('List documents').all()[i].json.doc,\n    text: item.json.data,\n  },\n}));"
+      },
+      "id": "c3000000-0000-4000-8000-000000000004",
+      "name": "Attach source name",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [200, 380]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": "kb_ops",
+        "options": { "clearStore": true }
+      },
+      "id": "c3000000-0000-4000-8000-000000000005",
+      "name": "Index handbook",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.1,
+      "position": [420, 380]
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.text }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [{ "name": "source", "value": "={{ $json.doc }}" }]
+          }
+        }
+      },
+      "id": "c3000000-0000-4000-8000-000000000006",
+      "name": "Document Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [460, 580]
+    },
+    {
+      "parameters": { "chunkSize": 1200, "chunkOverlap": 200, "options": {} },
+      "id": "c3000000-0000-4000-8000-000000000007",
+      "name": "Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [460, 760]
+    },
+
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "kb-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000010",
+      "name": "Ask webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-460, -80],
+      "webhookId": "c3000000-0000-4000-8000-000000000010"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.question }}",
+        "options": {
+          "systemMessage": "You are the internal IT and Operations assistant. You answer staff questions about company policy, and you take action when the situation calls for it.\n\nSOURCES\nEvery factual claim you make must come from the search_handbook tool. Search before answering, including when you think you already know. End every grounded answer with a line in exactly this form:\nSources: <document-name>\nListing more than one document is fine when the answer genuinely draws on more than one. Never cite a document you did not retrieve.\n\nWHEN THE HANDBOOK DOES NOT COVER IT\nSay so plainly and stop. Do not guess, do not generalise from adjacent policy, and do not offer a plausible-sounding number. If the handbook states that a list or detail is held elsewhere, say where it is held. An honest 'the handbook does not cover this' is a correct answer and is never a failure. In that case write 'Sources: none'.\n\nACTIONS\nAnswering is not always enough. Use tools when the person needs something done:\n- create_ticket: a fault or a request that IT has to work on.\n- book_slot: the person needs time with someone, or the handbook requires a live session, such as an identity check that must happen on a video call or a replacement onboarding session.\n- escalate_to_human: anything covered by the security incident policy. Clicked phishing, entered credentials, malware, data sent to the wrong recipient, a lost or stolen device, credentials found somewhere public, or a former employee with working access. Escalate first and explain second. Never open a normal ticket for a security incident, and never tell the person to wait.\n\nNever claim to have done something you did not do. If you did not call a tool, do not say a ticket was raised or an incident was reported. Report only the tool results you actually received, and quote the identifier the tool returned.\n\nSTYLE\nBe brief and concrete. Lead with the answer: the number, the deadline, or the next step first, then any qualification."
+        }
+      },
+      "id": "c3000000-0000-4000-8000-000000000011",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [-180, -80]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": { "temperature": 0 }
+      },
+      "id": "c3000000-0000-4000-8000-000000000012",
+      "name": "Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [-360, 120],
+      "credentials": {
+        "googlePalmApi": { "id": "EturPpZyxgEiS0RG", "name": "Gemini case2" }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "search_handbook",
+        "toolDescription": "Search the internal IT and Operations handbook. Returns passages together with the document each came from. Use for any question about policy, entitlements, deadlines, service levels, security rules, or procedures.",
+        "memoryKey": "kb_ops",
+        "topK": 4,
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000013",
+      "name": "search_handbook",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.1,
+      "position": [-180, 120]
+    },
+    {
+      "parameters": { "modelName": "models/gemini-embedding-001", "options": {} },
+      "id": "c3000000-0000-4000-8000-000000000014",
+      "name": "Embeddings",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [140, 180],
+      "credentials": {
+        "googlePalmApi": { "id": "EturPpZyxgEiS0RG", "name": "Gemini case2" }
+      }
+    },
+    {
+      "parameters": {
+        "name": "create_ticket",
+        "description": "Open a support ticket for a fault or a request IT must work on. Pass a one-line summary, followed by the severity (S1, S2, S3 or S4) when you can judge it.",
+        "jsCode": "const id = 'TKT-' + Math.floor(100000 + Math.random() * 899999);\nconst sla = { S1: '15 minutes', S2: '1 business hour', S3: '4 business hours', S4: '1 business day' };\nconst sev = (query.match(/\\bS[1-4]\\b/i) || ['S3'])[0].toUpperCase();\nreturn JSON.stringify({ ticket_id: id, severity: sev, first_response_due: sla[sev], summary: query });"
+      },
+      "id": "c3000000-0000-4000-8000-000000000015",
+      "name": "create_ticket",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.1,
+      "position": [20, 120]
+    },
+    {
+      "parameters": {
+        "name": "book_slot",
+        "description": "Book time with IT. Use when the person needs a live session, such as a replacement onboarding setup or an identity check that must happen on a video call. Pass the topic.",
+        "jsCode": "const id = 'BKG-' + Math.floor(1000 + Math.random() * 8999);\nconst d = new Date(Date.now() + 24 * 3600 * 1000);\nd.setUTCHours(14, 0, 0, 0);\nreturn JSON.stringify({ booking_id: id, slot: d.toISOString(), duration_minutes: 45, channel: 'video call', topic: query });"
+      },
+      "id": "c3000000-0000-4000-8000-000000000016",
+      "name": "book_slot",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.1,
+      "position": [180, 0]
+    },
+    {
+      "parameters": {
+        "name": "escalate_to_human",
+        "description": "Raise a security incident to the on-call responder immediately. Use for phishing that was acted on, malware, data sent to the wrong recipient, lost or stolen devices, exposed credentials, or a former employee with working access. Pass what happened.",
+        "jsCode": "const id = 'INC-' + Math.floor(10000 + Math.random() * 89999);\nreturn JSON.stringify({ incident_id: id, channel: '#security-incident', commander_assigned_within: '15 minutes', reported: query });"
+      },
+      "id": "c3000000-0000-4000-8000-000000000017",
+      "name": "escalate_to_human",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.1,
+      "position": [340, 120]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ answer: $json.output, execution_id: $execution.id }) }}",
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000018",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [120, -80]
+    }
+  ],
+  "connections": {
+    "Ingest webhook": { "main": [[{ "node": "List documents", "type": "main", "index": 0 }]] },
+    "List documents": { "main": [[{ "node": "Fetch document", "type": "main", "index": 0 }]] },
+    "Fetch document": { "main": [[{ "node": "Attach source name", "type": "main", "index": 0 }]] },
+    "Attach source name": { "main": [[{ "node": "Index handbook", "type": "main", "index": 0 }]] },
+    "Document Loader": {
+      "ai_document": [[{ "node": "Index handbook", "type": "ai_document", "index": 0 }]]
+    },
+    "Text Splitter": {
+      "ai_textSplitter": [[{ "node": "Document Loader", "type": "ai_textSplitter", "index": 0 }]]
+    },
+    "Ask webhook": { "main": [[{ "node": "AI Agent", "type": "main", "index": 0 }]] },
+    "AI Agent": { "main": [[{ "node": "Respond", "type": "main", "index": 0 }]] },
+    "Gemini Chat Model": {
+      "ai_languageModel": [[{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Embeddings": {
+      "ai_embedding": [
+        [
+          { "node": "Index handbook", "type": "ai_embedding", "index": 0 },
+          { "node": "search_handbook", "type": "ai_embedding", "index": 0 }
+        ]
+      ]
+    },
+    "search_handbook": { "ai_tool": [[{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]] },
+    "create_ticket": { "ai_tool": [[{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]] },
+    "book_slot": { "ai_tool": [[{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]] },
+    "escalate_to_human": { "ai_tool": [[{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}
