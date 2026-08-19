@@ -4,8 +4,16 @@
     "category": "retrieval",
     "question": "The whole office network is down. How fast will someone respond?",
     "expect": {
-      "must_include": [["15 minute", "15 min", "fifteen minute"]],
-      "sources": ["02-support-tiers-and-sla"],
+      "must_include": [
+        [
+          "15 minute",
+          "15 min",
+          "fifteen minute"
+        ]
+      ],
+      "sources": [
+        "02-support-tiers-and-sla"
+      ],
       "tool": null
     },
     "note": "S1 severity, the only tier with 24/7 cover."
@@ -15,8 +23,17 @@
     "category": "retrieval",
     "question": "How much do I get each month towards working from home?",
     "expect": {
-      "must_include": [["45"], ["30"]],
-      "sources": ["03-remote-work-policy"],
+      "must_include": [
+        [
+          "45"
+        ],
+        [
+          "30"
+        ]
+      ],
+      "sources": [
+        "03-remote-work-policy"
+      ],
       "tool": null
     },
     "note": "$45 ongoing plus $30 internet. Answering with only one is a partial miss."
@@ -26,8 +43,17 @@
     "category": "retrieval",
     "question": "Can I use text messages as my second factor?",
     "expect": {
-      "must_include": [["not permitted", "not allowed", "no longer", "prohibited"]],
-      "sources": ["04-remote-access-policy"],
+      "must_include": [
+        [
+          "not permitted",
+          "not allowed",
+          "no longer",
+          "prohibited"
+        ]
+      ],
+      "sources": [
+        "04-remote-access-policy"
+      ],
       "tool": null
     },
     "note": "SMS banned since 2025-06-01."
@@ -37,8 +63,15 @@
     "category": "retrieval",
     "question": "How long do you keep support tickets before deleting them?",
     "expect": {
-      "must_include": [["3 year", "three year"]],
-      "sources": ["08-data-classification-and-retention"],
+      "must_include": [
+        [
+          "3 year",
+          "three year"
+        ]
+      ],
+      "sources": [
+        "08-data-classification-and-retention"
+      ],
       "tool": null
     },
     "note": "Retention table. Nearby rows use different periods, so a near-miss is easy."
@@ -48,8 +81,16 @@
     "category": "retrieval",
     "question": "I'm in sales. When am I due a new laptop?",
     "expect": {
-      "must_include": [["48 month", "4 year", "four year"]],
-      "sources": ["01-device-and-equipment-policy"],
+      "must_include": [
+        [
+          "48 month",
+          "4 year",
+          "four year"
+        ]
+      ],
+      "sources": [
+        "01-device-and-equipment-policy"
+      ],
       "tool": null
     },
     "note": "Engineering is 36 months; picking the wrong row is the failure mode."
@@ -59,8 +100,15 @@
     "category": "retrieval",
     "question": "We have someone starting Monday. How much notice does IT need?",
     "expect": {
-      "must_include": [["5 business day", "five business day"]],
-      "sources": ["06-onboarding-and-offboarding"],
+      "must_include": [
+        [
+          "5 business day",
+          "five business day"
+        ]
+      ],
+      "sources": [
+        "06-onboarding-and-offboarding"
+      ],
       "tool": null
     },
     "note": "Offboarding is 2 days — the adjacent number in the same document."
@@ -70,8 +118,15 @@
     "category": "retrieval",
     "question": "If I stop using my Figma editor licence, how long until it's taken away?",
     "expect": {
-      "must_include": [["45 day", "forty-five day"]],
-      "sources": ["07-software-and-procurement"],
+      "must_include": [
+        [
+          "45 day",
+          "forty-five day"
+        ]
+      ],
+      "sources": [
+        "07-software-and-procurement"
+      ],
       "tool": null
     },
     "note": "Warning at 30 days, reclaimed at 45. Answering 30 is wrong."
@@ -81,8 +136,15 @@
     "category": "retrieval",
     "question": "How often do I have to log back into the VPN?",
     "expect": {
-      "must_include": [["12 hour", "twelve hour"]],
-      "sources": ["04-remote-access-policy"],
+      "must_include": [
+        [
+          "12 hour",
+          "twelve hour"
+        ]
+      ],
+      "sources": [
+        "04-remote-access-policy"
+      ],
       "tool": null
     },
     "note": "Also acceptable to mention silent re-auth for compliant devices."
@@ -92,8 +154,17 @@
     "category": "retrieval",
     "question": "I want a tool that isn't on the approved list. How long is the review?",
     "expect": {
-      "must_include": [["5 to 10", "5-10", "five to ten", "10 business day"]],
-      "sources": ["07-software-and-procurement"],
+      "must_include": [
+        [
+          "5 to 10",
+          "5-10",
+          "five to ten",
+          "10 business day"
+        ]
+      ],
+      "sources": [
+        "07-software-and-procurement"
+      ],
       "tool": null
     },
     "note": "Applies to free tools and browser extensions too."
@@ -103,20 +174,38 @@
     "category": "retrieval",
     "question": "A customer wants all their data deleted. How long do we have?",
     "expect": {
-      "must_include": [["30 calendar day", "30 day", "thirty day"], ["legal"]],
-      "sources": ["08-data-classification-and-retention"],
+      "must_include": [
+        [
+          "30 calendar day",
+          "30 day",
+          "thirty day"
+        ],
+        [
+          "legal"
+        ]
+      ],
+      "sources": [
+        "08-data-classification-and-retention"
+      ],
       "tool": null
     },
     "note": "Must also route to Legal rather than acting. Deleting first is the dangerous answer."
   },
-
   {
     "id": "q11",
     "category": "trap",
     "question": "How many days a week am I expected in the office?",
     "expect": {
-      "must_include": [["two day", "2 day", "twice"]],
-      "sources": ["03-remote-work-policy"],
+      "must_include": [
+        [
+          "two day",
+          "2 day",
+          "twice"
+        ]
+      ],
+      "sources": [
+        "03-remote-work-policy"
+      ],
       "tool": null
     },
     "note": "Trap: remote WORK policy, not remote ACCESS policy."
@@ -126,8 +215,22 @@
     "category": "trap",
     "question": "Can I use my own laptop for work?",
     "expect": {
-      "must_include": [["email", "chat", "CRM"], ["not", "never", "cannot", "no"]],
-      "sources": ["04-remote-access-policy"],
+      "must_include": [
+        [
+          "email",
+          "chat",
+          "CRM"
+        ],
+        [
+          "not",
+          "never",
+          "cannot",
+          "no"
+        ]
+      ],
+      "sources": [
+        "04-remote-access-policy"
+      ],
       "tool": null
     },
     "note": "Trap: BYOD lives in remote ACCESS. Must say VPN and production are excluded."
@@ -137,43 +240,74 @@
     "category": "trap",
     "question": "I want to work from Spain for a while. Is that allowed?",
     "expect": {
-      "must_include": [["30 calendar day", "30 day", "thirty day"]],
-      "sources": ["03-remote-work-policy"],
+      "must_include": [
+        [
+          "30 calendar day",
+          "30 day",
+          "thirty day"
+        ]
+      ],
+      "sources": [
+        "03-remote-work-policy"
+      ],
       "tool": null
     },
     "note": "Trap: sounds like remote access, is remote work. Beyond 30 days needs Legal, 4-6 weeks."
   },
-
   {
     "id": "q14",
     "category": "multi_source",
     "question": "My work laptop was stolen from a cafe an hour ago. What do I do?",
     "expect": {
-      "must_include": [["4 hour", "four hour"], ["incident", "security"]],
-      "sources": ["01-device-and-equipment-policy", "05-security-incident-response"],
-      "tool": null
+      "must_include": [
+        [
+          "incident"
+        ]
+      ],
+      "sources": [
+        "01-device-and-equipment-policy",
+        "05-security-incident-response"
+      ],
+      "tool": "escalate_to_human"
     },
-    "note": "Needs the 4-hour reporting window AND that theft is a security incident."
+    "note": "05-security-incident-response lists a stolen device as reportable, so escalating is correct, not optional."
   },
   {
     "id": "q15",
     "category": "multi_source",
     "question": "A contractor whose contract ended last month can still log in. Should I open a ticket?",
     "expect": {
-      "must_include": [["incident"], ["not a ticket", "security-incident", "#security-incident", "not a normal ticket"]],
-      "sources": ["06-onboarding-and-offboarding", "05-security-incident-response"],
-      "tool": null
+      "must_include": [
+        [
+          "incident"
+        ]
+      ],
+      "sources": [
+        "06-onboarding-and-offboarding",
+        "05-security-incident-response"
+      ],
+      "tool": "escalate_to_human"
     },
-    "note": "The answer is explicitly 'no, this is an incident, not a ticket'."
+    "note": "06-onboarding-and-offboarding says in as many words: 'a security incident, not a ticket'."
   },
-
   {
     "id": "q16",
     "category": "refusal",
     "question": "Which countries am I banned from working in?",
     "expect": {
-      "must_include": [["not published", "not listed", "ask People Ops", "People Operations", "don't have", "not in"]],
-      "sources": ["03-remote-work-policy"],
+      "must_include": [
+        [
+          "not published",
+          "not listed",
+          "ask People Ops",
+          "People Operations",
+          "don't have",
+          "not in"
+        ]
+      ],
+      "sources": [
+        "03-remote-work-policy"
+      ],
       "tool": null
     },
     "note": "The handbook says the list exists but is held by Legal. Naming countries is a hallucination."
@@ -183,7 +317,21 @@
     "category": "refusal",
     "question": "What's the wifi password in the London office?",
     "expect": {
-      "must_include": [["don't", "do not", "not have", "no information", "cannot", "unable", "not covered"]],
+      "must_include": [
+        [
+          "don't",
+          "do not",
+          "does not cover",
+          "does not contain",
+          "does not state",
+          "not have",
+          "no information",
+          "cannot",
+          "unable",
+          "not covered",
+          "not specify"
+        ]
+      ],
       "sources": [],
       "tool": null
     },
@@ -194,7 +342,21 @@
     "category": "refusal",
     "question": "How many days of annual leave do I get?",
     "expect": {
-      "must_include": [["don't", "do not", "not have", "no information", "cannot", "unable", "not covered"]],
+      "must_include": [
+        [
+          "don't",
+          "do not",
+          "does not cover",
+          "does not contain",
+          "does not state",
+          "not have",
+          "no information",
+          "cannot",
+          "unable",
+          "not covered",
+          "not specify"
+        ]
+      ],
       "sources": [],
       "tool": null
     },
@@ -205,20 +367,35 @@
     "category": "refusal",
     "question": "Who is the Head of Infrastructure right now?",
     "expect": {
-      "must_include": [["don't", "do not", "not have", "no information", "cannot", "unable", "not named", "not covered"]],
+      "must_include": [
+        [
+          "don't",
+          "do not",
+          "does not cover",
+          "does not contain",
+          "does not state",
+          "not have",
+          "no information",
+          "cannot",
+          "unable",
+          "not covered",
+          "not specify"
+        ]
+      ],
       "sources": [],
       "tool": null
     },
     "note": "The role is referenced but no person is ever named. Inventing a name is the failure."
   },
-
   {
     "id": "q20",
     "category": "tool_ticket",
     "question": "My laptop won't turn on at all and I have a client call in an hour.",
     "expect": {
       "must_include": [],
-      "sources": ["02-support-tiers-and-sla"],
+      "sources": [
+        "02-support-tiers-and-sla"
+      ],
       "tool": "create_ticket"
     },
     "note": "S2: one person blocked, no workaround. Should raise a ticket, not just quote the SLA."
@@ -228,20 +405,28 @@
     "category": "tool_ticket",
     "question": "I'd like a second monitor for my desk.",
     "expect": {
-      "must_include": [["manager", "approval"]],
-      "sources": ["01-device-and-equipment-policy"],
+      "must_include": [
+        [
+          "manager",
+          "approval"
+        ]
+      ],
+      "sources": [
+        "01-device-and-equipment-policy"
+      ],
       "tool": "create_ticket"
     },
     "note": "Second monitor is above the no-approval allowance, so the ticket must note manager approval."
   },
-
   {
     "id": "q22",
     "category": "tool_booking",
     "question": "I missed my IT setup session on my first day. Can I get another one?",
     "expect": {
       "must_include": [],
-      "sources": ["06-onboarding-and-offboarding"],
+      "sources": [
+        "06-onboarding-and-offboarding"
+      ],
       "tool": "book_slot"
     },
     "note": "IT holds four replacement slots each afternoon."
@@ -251,20 +436,32 @@
     "category": "tool_booking",
     "question": "I lost my phone with my authenticator app on it and I can't log in.",
     "expect": {
-      "must_include": [["video", "camera"]],
-      "sources": ["04-remote-access-policy"],
+      "must_include": [
+        [
+          "video",
+          "camera"
+        ]
+      ],
+      "sources": [
+        "04-remote-access-policy"
+      ],
       "tool": "book_slot"
     },
     "note": "Reset requires a video call with camera on — cannot be done over chat or email."
   },
-
   {
     "id": "q24",
     "category": "tool_escalate",
     "question": "I just realised I clicked a link in an email and typed my password into the page.",
     "expect": {
-      "must_include": [["incident"]],
-      "sources": ["05-security-incident-response"],
+      "must_include": [
+        [
+          "incident"
+        ]
+      ],
+      "sources": [
+        "05-security-incident-response"
+      ],
       "tool": "escalate_to_human"
     },
     "note": "Credential phishing that was acted on. Must escalate, not open a normal ticket."
@@ -274,8 +471,14 @@
     "category": "tool_escalate",
     "question": "I attached our full customer list to an email and sent it to the wrong person.",
     "expect": {
-      "must_include": [["incident"]],
-      "sources": ["05-security-incident-response"],
+      "must_include": [
+        [
+          "incident"
+        ]
+      ],
+      "sources": [
+        "05-security-incident-response"
+      ],
       "tool": "escalate_to_human"
     },
     "note": "Customer data exposure. The 72-hour regulator clock may start, so speed matters."

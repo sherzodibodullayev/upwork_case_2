@@ -12,7 +12,10 @@
       "name": "Ingest webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [-460, 380],
+      "position": [
+        -460,
+        380
+      ],
       "webhookId": "c3000000-0000-4000-8000-000000000001"
     },
     {
@@ -23,18 +26,33 @@
       "name": "List documents",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-240, 380]
+      "position": [
+        -240,
+        380
+      ]
     },
     {
       "parameters": {
         "url": "={{ $json.url }}",
-        "options": { "response": { "response": { "responseFormat": "text" } } }
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
       },
       "id": "c3000000-0000-4000-8000-000000000003",
       "name": "Fetch document",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [-20, 380]
+      "position": [
+        -20,
+        380
+      ],
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -44,19 +62,27 @@
       "name": "Attach source name",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [200, 380]
+      "position": [
+        200,
+        380
+      ]
     },
     {
       "parameters": {
         "mode": "insert",
         "memoryKey": "kb_ops",
-        "options": { "clearStore": true }
+        "options": {
+          "clearStore": true
+        }
       },
       "id": "c3000000-0000-4000-8000-000000000005",
       "name": "Index handbook",
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1.1,
-      "position": [420, 380]
+      "position": [
+        420,
+        380
+      ]
     },
     {
       "parameters": {
@@ -64,7 +90,12 @@
         "jsonData": "={{ $json.text }}",
         "options": {
           "metadata": {
-            "metadataValues": [{ "name": "source", "value": "={{ $json.doc }}" }]
+            "metadataValues": [
+              {
+                "name": "source",
+                "value": "={{ $json.doc }}"
+              }
+            ]
           }
         }
       },
@@ -72,17 +103,26 @@
       "name": "Document Loader",
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1,
-      "position": [460, 580]
+      "position": [
+        460,
+        580
+      ]
     },
     {
-      "parameters": { "chunkSize": 1200, "chunkOverlap": 200, "options": {} },
+      "parameters": {
+        "chunkSize": 1200,
+        "chunkOverlap": 200,
+        "options": {}
+      },
       "id": "c3000000-0000-4000-8000-000000000007",
       "name": "Text Splitter",
       "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
       "typeVersion": 1,
-      "position": [460, 760]
+      "position": [
+        460,
+        760
+      ]
     },
-
     {
       "parameters": {
         "httpMethod": "POST",
@@ -94,7 +134,10 @@
       "name": "Ask webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [-460, -80],
+      "position": [
+        -460,
+        -80
+      ],
       "webhookId": "c3000000-0000-4000-8000-000000000010"
     },
     {
@@ -102,28 +145,42 @@
         "promptType": "define",
         "text": "={{ $json.body.question }}",
         "options": {
-          "systemMessage": "You are the internal IT and Operations assistant. You answer staff questions about company policy, and you take action when the situation calls for it.\n\nSOURCES\nEvery factual claim you make must come from the search_handbook tool. Search before answering, including when you think you already know. End every grounded answer with a line in exactly this form:\nSources: <document-name>\nListing more than one document is fine when the answer genuinely draws on more than one. Never cite a document you did not retrieve.\n\nWHEN THE HANDBOOK DOES NOT COVER IT\nSay so plainly and stop. Do not guess, do not generalise from adjacent policy, and do not offer a plausible-sounding number. If the handbook states that a list or detail is held elsewhere, say where it is held. An honest 'the handbook does not cover this' is a correct answer and is never a failure. In that case write 'Sources: none'.\n\nACTIONS\nAnswering is not always enough. Use tools when the person needs something done:\n- create_ticket: a fault or a request that IT has to work on.\n- book_slot: the person needs time with someone, or the handbook requires a live session, such as an identity check that must happen on a video call or a replacement onboarding session.\n- escalate_to_human: anything covered by the security incident policy. Clicked phishing, entered credentials, malware, data sent to the wrong recipient, a lost or stolen device, credentials found somewhere public, or a former employee with working access. Escalate first and explain second. Never open a normal ticket for a security incident, and never tell the person to wait.\n\nNever claim to have done something you did not do. If you did not call a tool, do not say a ticket was raised or an incident was reported. Report only the tool results you actually received, and quote the identifier the tool returned.\n\nSTYLE\nBe brief and concrete. Lead with the answer: the number, the deadline, or the next step first, then any qualification."
+          "systemMessage": "You are the internal IT and Operations assistant. You answer staff questions about company policy, and you take action when the situation calls for it.\n\nSEARCH FIRST, ALWAYS\nCall search_handbook at least once before every single reply. There is no exception. Search when you are certain of the answer. Search when the question sounds like it is not covered. Search before taking an action, because the handbook is what decides which action is correct and what you must tell the person afterwards. Deciding to act is never a reason to skip the search.\nIf the first search comes back thin, search again with different words before concluding anything.\n\nSOURCES\nEvery factual claim you make must come from the search_handbook tool. End every grounded answer with a line in exactly this form:\nSources: <document-name>\nUse the document name exactly as it appears in the source field of the passages you retrieved, for example 05-security-incident-response. Never write a prose title such as 'Security Incident Policy', and never write a name you did not see in a search result.\nList every document you actually used. When one document told you what the thing is and another told you what to do about it, both belong on the line. Never cite a document you did not retrieve.\nThis applies to every reply without exception, including replies where you called a tool. Taking an action does not excuse you from citing the policy that told you to take it. 'Sources: none' is only ever correct when the handbook genuinely does not cover the question.\n\nWHEN THE HANDBOOK DOES NOT COVER IT\nSay so plainly and stop. Do not guess, do not generalise from adjacent policy, and do not offer a plausible-sounding number. If the handbook states that a list or detail is held elsewhere, say where it is held. An honest 'the handbook does not cover this' is a correct answer and is never a failure. In that case write 'Sources: none'.\n\nACTIONS\nRead what the person actually wants.\n'What does the policy say about X' is a question. Answer it. Do not open anything.\n'I would like X', 'I need X', 'can I get X', 'X is broken', 'I missed X' are requests. Act on them in the same reply, then say what you did and quote the identifier the tool returned.\nNever answer a request by telling the person to open a ticket themselves, and never ask which time suits them before booking. Book the slot, then tell them the time and how to move it.\n\nWhen they want something done and the handbook supports doing it, do it now and report what you did.\nTaking an action never replaces answering. If they asked a question as well, answer the question first, in full, and mention the action afterwards. A reply that is only a ticket number has failed the person who asked what the response time is.\nAn approval the handbook requires, such as a manager sign-off, is something to state, not something to wait for. Raise the ticket, then say what approval still has to reach it. Never make the person come back to you. Do not describe the action and wait, do not tell the person to open a ticket themselves, and do not ask whether they would like you to proceed. They already asked by describing the problem. Requiring an approval that the handbook mentions, such as a manager sign-off, is not a reason to hold back: take the action and say in the same breath what approval still has to follow.\n\nUse tools when the person needs something done:\n- create_ticket: a fault or a request that IT has to work on.\n- book_slot: the person needs time with someone, or the handbook requires a live session, such as an identity check that must happen on a video call or a replacement onboarding session.\n- escalate_to_human: anything covered by the security incident policy. Clicked phishing, entered credentials, malware, data sent to the wrong recipient, a lost or stolen device, credentials found somewhere public, or a former employee with working access. Escalate first and explain second. Never open a normal ticket for a security incident, and never tell the person to wait.\n\nNever claim to have done something you did not do. If you did not call a tool, do not say a ticket was raised or an incident was reported. Report only the tool results you actually received, and quote the identifier the tool returned.\n\nSTYLE\nBe brief and concrete. Lead with the answer: the number, the deadline, or the next step first, then any qualification."
         }
       },
       "id": "c3000000-0000-4000-8000-000000000011",
       "name": "AI Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.7,
-      "position": [-180, -80]
+      "position": [
+        -180,
+        -80
+      ]
     },
     {
       "parameters": {
         "modelName": "models/gemini-3.1-flash-lite",
-        "options": { "temperature": 0 }
+        "options": {
+          "temperature": 0
+        }
       },
       "id": "c3000000-0000-4000-8000-000000000012",
       "name": "Gemini Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
-      "position": [-360, 120],
+      "position": [
+        -360,
+        120
+      ],
       "credentials": {
-        "googlePalmApi": { "id": "EturPpZyxgEiS0RG", "name": "Gemini case2" }
-      }
+        "googlePalmApi": {
+          "id": "EturPpZyxgEiS0RG",
+          "name": "Gemini case2"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -131,25 +188,40 @@
         "toolName": "search_handbook",
         "toolDescription": "Search the internal IT and Operations handbook. Returns passages together with the document each came from. Use for any question about policy, entitlements, deadlines, service levels, security rules, or procedures.",
         "memoryKey": "kb_ops",
-        "topK": 4,
+        "topK": 8,
         "options": {}
       },
       "id": "c3000000-0000-4000-8000-000000000013",
       "name": "search_handbook",
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1.1,
-      "position": [-180, 120]
+      "position": [
+        -180,
+        120
+      ]
     },
     {
-      "parameters": { "modelName": "models/gemini-embedding-001", "options": {} },
+      "parameters": {
+        "modelName": "models/gemini-embedding-001",
+        "options": {}
+      },
       "id": "c3000000-0000-4000-8000-000000000014",
       "name": "Embeddings",
       "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
       "typeVersion": 1,
-      "position": [140, 180],
+      "position": [
+        140,
+        180
+      ],
       "credentials": {
-        "googlePalmApi": { "id": "EturPpZyxgEiS0RG", "name": "Gemini case2" }
-      }
+        "googlePalmApi": {
+          "id": "EturPpZyxgEiS0RG",
+          "name": "Gemini case2"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -161,7 +233,10 @@
       "name": "create_ticket",
       "type": "@n8n/n8n-nodes-langchain.toolCode",
       "typeVersion": 1.1,
-      "position": [20, 120]
+      "position": [
+        20,
+        120
+      ]
     },
     {
       "parameters": {
@@ -173,7 +248,10 @@
       "name": "book_slot",
       "type": "@n8n/n8n-nodes-langchain.toolCode",
       "typeVersion": 1.1,
-      "position": [180, 0]
+      "position": [
+        180,
+        0
+      ]
     },
     {
       "parameters": {
@@ -185,7 +263,10 @@
       "name": "escalate_to_human",
       "type": "@n8n/n8n-nodes-langchain.toolCode",
       "typeVersion": 1.1,
-      "position": [340, 120]
+      "position": [
+        340,
+        120
+      ]
     },
     {
       "parameters": {
@@ -197,37 +278,174 @@
       "name": "Respond",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [120, -80]
+      "position": [
+        120,
+        -80
+      ]
     }
   ],
   "connections": {
-    "Ingest webhook": { "main": [[{ "node": "List documents", "type": "main", "index": 0 }]] },
-    "List documents": { "main": [[{ "node": "Fetch document", "type": "main", "index": 0 }]] },
-    "Fetch document": { "main": [[{ "node": "Attach source name", "type": "main", "index": 0 }]] },
-    "Attach source name": { "main": [[{ "node": "Index handbook", "type": "main", "index": 0 }]] },
+    "Ingest webhook": {
+      "main": [
+        [
+          {
+            "node": "List documents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List documents": {
+      "main": [
+        [
+          {
+            "node": "Fetch document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch document": {
+      "main": [
+        [
+          {
+            "node": "Attach source name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach source name": {
+      "main": [
+        [
+          {
+            "node": "Index handbook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Document Loader": {
-      "ai_document": [[{ "node": "Index handbook", "type": "ai_document", "index": 0 }]]
+      "ai_document": [
+        [
+          {
+            "node": "Index handbook",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Text Splitter": {
-      "ai_textSplitter": [[{ "node": "Document Loader", "type": "ai_textSplitter", "index": 0 }]]
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Document Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "Ask webhook": { "main": [[{ "node": "AI Agent", "type": "main", "index": 0 }]] },
-    "AI Agent": { "main": [[{ "node": "Respond", "type": "main", "index": 0 }]] },
+    "Ask webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Gemini Chat Model": {
-      "ai_languageModel": [[{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]]
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Embeddings": {
       "ai_embedding": [
         [
-          { "node": "Index handbook", "type": "ai_embedding", "index": 0 },
-          { "node": "search_handbook", "type": "ai_embedding", "index": 0 }
+          {
+            "node": "Index handbook",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "search_handbook",
+            "type": "ai_embedding",
+            "index": 0
+          }
         ]
       ]
     },
-    "search_handbook": { "ai_tool": [[{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]] },
-    "create_ticket": { "ai_tool": [[{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]] },
-    "book_slot": { "ai_tool": [[{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]] },
-    "escalate_to_human": { "ai_tool": [[{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]] }
+    "search_handbook": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_ticket": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "book_slot": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "escalate_to_human": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "settings": { "executionOrder": "v1" }
+  "settings": {
+    "executionOrder": "v1"
+  }
 }
